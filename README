@@ -1,0 +1,125 @@
+Blog/Simple version 0.01
+========================
+
+NAME
+    Blog::Simple - Perl extension for the creation of a simple weblog
+    (blogger) system.
+
+SYNOPSIS
+    use Blog::Simple;
+
+    my $sbO = Blog::Simple->new(); $sbO->create_index(); #generally only
+    needs to be called once
+
+    my $content="<p>blah blah blah in XHTMthe p entry elsewhere in this
+    document <p><b>Better</b> when done in XHTMthe p entry elsewhere in this
+    document"; my $title = 'some title'; my $author = 'a.n. author'; my
+    $email = 'anaouthor@somedomain.net'; my $smmry = 'blah blah';
+    $sbO->add($title,$author,$email,$smmry,$content);
+
+    $sbO->render_current('blog_test.xsl',3);
+    $sbO->render_all('blog_test.xsl');
+
+    $sbO->remove('08');
+
+DESCRIPTION
+    This module provides a simple mechanism for blogging, the reverse
+    chronological diary-like systems so popular on the Internet today. It
+    was intended to be simple, and just handles the basics of blogging:
+    managing blog entries (adding, removing -- there probably should be a
+    'modify,' but there isn't), generating the most recent *n* entries, and
+    generating all of the entries in the 'blogbase'.
+
+    Blog::Simple requires that the XML::XSL module be installed. Rather than
+    try and do the rendering itself, it passes the XML that it generates to
+    an XSL file that the user creates. So you will need to know XSLT to
+    really find this module useful.
+
+    Blog::Simple generates XML files and stores them in a blogbase and in a
+    timestamped subfolder. The blogbase consists of a folder under the path
+    you specify in your code called b_base and a file called bb.idx. If no
+    path is given, then it uses the directory the calling Perl file is saved
+    in. bb.idx contains a tab-delimited list of the path, datestamp, title,
+    author, summary of each blog entry. The Blog::Simple generated XML files
+    are stored underneath b_base in automatically generated timestamped
+    folders.
+
+    The XML entry for a blog is rendered as follows (this XML template is
+    hardcoded in the "add()" method):
+
+            <simple_blog>
+        
+                    <!-- title of blog -->
+                    <title>$title</title>
+                
+                    <!-- who wrote it -->
+                    <author>$author</author>
+                
+                    <!-- email -->
+                    <email>$email</email>
+
+                    <!-- timestamp - generated automatically -->
+                    <ts>$ts</ts>
+                
+                    <!-- just text here - NO TABS -->
+                    <summary>$smmry</summary>
+                
+                    <!-- put XHTML blog between these tags      -->
+                    <!--   <img> tags must refer to same folder -->
+                    <content>$content</content>
+        
+            </simple_blog>
+
+    When you tell Blog::Simple to generate its output, you will need an XSL
+    document. One I used for testing looks like:
+
+            <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+        
+                    <!-- this is the main template match -->
+                    <xsl:template match="/">
+                            <xsl:apply-templates select="simple_blog_wrap/simple_blog"/>              
+                    </xsl:template>
+
+                    <xsl:template match="simple_blog">
+                            <xsl:apply-templates select="title"/>
+                            <xsl:apply-templates select="ts"/>
+                            <xsl:apply-templates select="content"/> 
+                    </xsl:template>
+
+                    <xsl:template match="title"><xsl:copy-of select="."/></xsl:template>
+
+                    <xsl:template match="ts"><xsl:copy-of select="."/></xsl:template>
+
+                    <xsl:template match="content"><xsl:copy-of select="."/></xsl:template>
+
+            </xsl:stylesheet>
+
+    That should get you started. An XSL stylesheet is required when you
+    invoke the "render_current()" and "render_all()" methods. Blog::Simple
+    wraps a root element around all the "<simple_blog></simple_blog>"
+    elements it renders called "<simple_blog_wrap></simple_blog_wrap>". Keep
+    this in mind when you are writing your XSL stylesheet.
+
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  XML::XSL
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2002 J. A. Robson
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+
