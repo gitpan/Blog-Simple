@@ -7,7 +7,7 @@ use warnings;
 require Exporter;
 
 our @ISA = qw(Exporter);
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 require XML::XSLT;
 use XML::XSLT;

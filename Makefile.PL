@@ -4,8 +4,8 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'Blog::Simple',
     'VERSION_FROM'	=> 'Simple.pm', # finds $VERSION
-    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
+    'PREREQ_PM'		=> {'XML::XSLT' => '0.32'}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'Simple.pm', # retrieve abstract from module
-       AUTHOR     => 'A. U. Thor <a.u.thor@a.galaxy.far.far.away>') : ()),
+       AUTHOR     => 'J. A. Robson <gilad@arbingersys.com>') : ()),
 );
