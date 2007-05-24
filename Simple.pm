@@ -7,7 +7,7 @@ use warnings;
 require Exporter;
 
 our @ISA = qw(Exporter);
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 require XML::XSLT;
 use XML::XSLT;
@@ -207,15 +207,17 @@ END_BT
 		
 		my $outP = $xslt->toString; 
 
-		if (not defined($outFile)) { #if output file set to nothing, spit to STDOUT
-			print $outP;
+		if (defined($outFile)) {
+			if ($outFile eq '-') { #if output file set to '-', spit to STDOUT
+				print $outP;
+			} else {
+				open (OF, ">$obj->{path}". $outFile);
+				print OF $outP;
+				close OF;
+			}
 		}
-		else {
-			open (OF, ">$obj->{path}". $outFile);
-			print OF $outP;
-			close OF;
-		}
-			
+
+		return $outP;
 	}
 	
 	sub get_index {
@@ -267,15 +269,16 @@ END_BT
 		
 		my $outP = $xslt->toString; 
 
-		if (not defined($outFile)) { #if output file not defined, spit to STDOUT
-			print $outP;
+		if (defined($outFile)) {
+			if ($outFile eq '-') { #if output file is '-', spit to STDOUT
+				print $outP;
+			} else {
+				open (OF, ">$obj->{path}". $outFile);
+				print OF $outP;
+				close OF;
+			}
 		}
-		else {
-			open (OF, ">$obj->{path}". $outFile);
-			print OF $outP;
-			close OF;
-		}
-		
+		return $outP;
 	}
 
 # Autoload methods go after =cut, and are processed by the autosplit program.
@@ -290,23 +293,33 @@ Blog::Simple - Perl extension for the creation of a simple weblog (blogger) syst
 
 =head1 SYNOPSIS
 	
-use Blog::Simple;
-  
-my $sbO = Blog::Simple->new();
-$sbO->create_index(); #generally only needs to be called once
-  
-my $content="<p>blah blah blah in XHTML</p>
-<p><b>Better</b> when done in XHTML</p>";
-my $title = 'some title';
-my $author = 'a.n. author';
-my $email = 'anaouthor@somedomain.net';
-my $smmry = 'blah blah';
-$sbO->add($title,$author,$email,$smmry,$content);
-  
-$sbO->render_current('blog_test.xsl',3);
-$sbO->render_all('blog_test.xsl');
-  
-$sbO->remove('08');
+	use Blog::Simple;
+
+	my $sbO = Blog::Simple->new();
+
+	# generally you need to call $sbO->create_index() only once to create bb.idx
+	$sbO->create_index() unless (-f 'bb.idx');
+
+	my $content='<p>blah blah blah in XHTML </p>
+	<p><b>Better</b> when done in XHTML </p>';
+	my $title = 'some title';
+	my $author = 'a.n. author';
+	my $email = 'anaouthor@somedomain.net';
+	my $smmry = 'blah blah';
+
+	# add blog entry
+	$sbO->add($title,$author,$email,$smmry,$content);
+
+	# get result in $outHTML
+	my $outHTML = $sbO->render_current('blog_test.xsl',3);
+
+	# print result to STDOUT
+	$sbO->render_all('blog_test.xsl', '-');
+
+	# print result in 'blog.html'
+	$sbO->render_current('blog_test.xsl',1,'blog.html');
+
+	$sbO->remove('08');
 
 =head1 REQUIRES
 
@@ -431,17 +444,26 @@ This method processes an arbitrary number of the most recent blog entries agains
 
 generates three blog entries and saves them to the file F<output.html>. The same call, but sent to standard output:
 
-	$sbO->render_current('myxslfile.xsl', 3);
+	$sbO->render_current('myxslfile.xsl', 3, '-');
+
+and again, but get the output in local variable:
+
+	my $output = $sbO->render_current('myxslfile.xsl', 3);
+
 
 =head3 C<render_all( $xsl_file [, $out_file] )>
 
 C<render_all()> looks up all the blog entries stored in the blogbase and applies the stylesheet you provide against it. C<$out_file> specifies a path/filename to save the output to.
 
-	$sbO->render_all('mystylesheet.xsl');
+	$sbO->render_all('mystylesheet.xsl', '-');
 
 or 
 	
 	$sbO->render_all('mystylesheet.xsl', 'output.html');
+
+or
+
+	my $out = $sbO->render_all('mystylesheet.xsl');
 
 =head3 C<get_index()>
 

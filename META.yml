@@ -1,0 +1,14 @@
+--- #YAML:1.0
+name:                Blog-Simple
+version:             0.03
+abstract:            Perl extension for the creation of a simple weblog (blogger) system.
+license:             ~
+generated_by:        ExtUtils::MakeMaker version 6.32
+distribution_type:   module
+requires:     
+    XML::XSLT:                     0.32
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+author:
+    - J. A. Robson <gilad@arbingersys.com>
